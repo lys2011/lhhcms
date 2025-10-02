@@ -1,0 +1,78 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>在线BASE64编码解码工具</title>
+<meta name="keywords" content="在线BASE64编码解码工具">
+<meta name="description" content="BASE64编码与解码,可以方便快速的编码解码BASE64工具">
+<script type="text/javascript" src="common/static/js/jquery-1.8.2.min.js"></script>
+<script type="text/javascript" src="common/static/js/core-min.js"></script>
+<script type="text/javascript" src="common/static/js/enc-base64-min.js"></script>
+<style>
+*{margin:0;padding:0;}
+body{ text-align: center; font-family: 宋体; font-size: 12px; }
+.head h1{ color:#737373;padding-top:38px;padding-bottom:18px;height:30px; }
+.main { width:950px; height:auto; border:#76b3ff 1px solid; margin-top:6px; margin:0 auto;}
+.main .content{ padding:12px 0; text-align:center; }
+.main .content textarea { font-size:14px; width:912px; height:400px; border:#76b3ff 1px solid; background:#f3fff1; /*resize:vertical;*/ padding:5px;}
+select,input{ margin:10px; padding:5px; }
+.text{ width:912px; padding: 10px 19px; /*border:#d3eace 1px solid;*/ border:#76b3ff 1px solid; margin:18px auto; text-align:left; font-size:14px; }
+.text h3{margin:8px 0;}
+.text p{margin-bottom:20px;}
+.foot{ width:950px; color:#737373; text-align:center; margin:0 auto; margin-top:28px; }
+.foot ul {display:inline-block; *display:inline; zoom:1;}
+.foot ul li {float:left; margin:0 10px; list-style-type:none;}
+.foot a{ color:#737373; text-decoration:none; }
+.foot a:hover{ color:#f06314; text-decoration:underline;}
+</style>
+</head>
+<body>
+	<div class="head">		
+		<h1>在线BASE64编码解码工具</h1>
+	</div>
+	<div class="main">
+		<div class="content">
+			<textarea id="q" onclick="xz()">欢迎使用星怀蓝梦工具,Welcome www.pppabc.com</textarea>
+			<input type="button" onclick="qk()" title="清空文章内容" value="清空内容" />
+			<input type="button" onclick="base64_encode()" title="BASE64编码" value="BASE64编码">
+			<input type="button" onclick="base64_decode()" title="BASE64解码" value="BASE64解码">
+		</div>
+	</div>
+	<div class="text">
+		<h3>Base64编码说明</h3>
+		<p>Base64编码要求把3个8位字节（3*8=24）转化为4个6位的字节（4*6=24），之后在6位的前面补两个0，形成8位一个字节的形式。 如果剩下的字符不足3个字节，则用0填充，输出字符使用'='，因此编码后输出的文本末尾可能会出现1或2个'='。
+
+为了保证所输出的编码位可读字符，Base64制定了一个编码表，以便进行统一转换。编码表的大小为2^6=64，这也是Base64名称的由来。</p>
+		<h3>Base64编码表(由英文大小字母，0-9数字，加号和斜杠组成，共64个，往右数，字母A的码值为0，斜杠/的码值为63)</h3>		
+	</div>
+	<div class="foot">
+		<div>
+		<ul>
+			<li><a href="http://www.pppabc.com">星怀蓝梦个人网站</a></li>			
+		</ul>
+		</div>
+	</div>
+
+
+
+
+<script language=javascript>
+function xz(){
+	if($('#q').val()=='欢迎使用星怀梦工具,Welcome www.pppabc.com') $('#q').select();
+}
+
+function qk(){
+	$('#q').val('');
+}
+function base64_encode(){
+	var str=CryptoJS.enc.Utf8.parse($("#q").val());
+	var base64=CryptoJS.enc.Base64.stringify(str);
+	$("#q").val(base64);
+}
+function base64_decode(){
+	var words  = CryptoJS.enc.Base64.parse($("#q").val());
+	$("#q").val(words.toString(CryptoJS.enc.Utf8));
+}
+</script>
+</body>
+</html>

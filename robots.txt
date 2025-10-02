@@ -1,0 +1,6 @@
+#
+# robots.txt for LysCMS v7.4
+#
+User-agent: * 
+Disallow: /cache
+Disallow: /lysphp

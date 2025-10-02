@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>B站视频播放列表</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 10px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .video-list {
+            width: 100%;
+            overflow-y: auto;
+            background: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 10px;
+            margin-bottom: 15px;
+            max-height: 40vh;
+        }
+        .video-player {
+            width: 100%;
+            background: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 15px;
+        }
+        .video-item {
+            padding: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: background 0.3s;
+        }
+        .video-item:hover {
+            background: #f0f0f0;
+        }
+        .video-item.active {
+            background: #e6f7ff;
+            border-left: 3px solid #1890ff;
+        }
+        iframe {
+            width: 100%;
+            height: 300px; /* 移动端高度调整 */
+            border: none;
+            border-radius: 5px;
+        }
+
+        /* 移动端布局调整 */
+        @media (max-width: 767px) {
+            body {
+                padding: 8px;
+                padding-bottom: env(safe-area-inset-bottom);
+                overflow-x: hidden;
+                width: 100%;
+                touch-action: pan-y; /* 只允许垂直方向的触摸滚动 */
+            }
+            .container {
+                flex-direction: column-reverse;
+                height: 100vh;
+                width: 100%;
+                max-width: 100%;
+                overflow: hidden; /* 禁止容器滚动 */
+            }
+            .video-player {
+                position: relative;
+                padding: 10px;
+                margin-bottom: 8px;
+                overflow: hidden; /* 禁止播放器区域滚动 */
+            }
+            iframe {
+                height: calc(50vh - 60px);
+                min-height: 200px;
+                pointer-events: auto; /* 确保iframe可以交互 */
+            }
+            .video-list {
+                margin-top: 8px;
+                max-height: calc(50vh - 40px);
+                overflow-y: auto; /* 只允许列表区域滚动 */
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+
+        /* 桌面端样式保持不变 */
+        @media (min-width: 768px) {
+            .container {
+                flex-direction: row;
+            }
+            .video-list {
+                width: 30%;
+                margin-right: 20px;
+                margin-bottom: 0;
+                max-height: 90vh;
+            }
+            .video-player {
+                width: 70%;
+                padding: 20px;
+            }
+            iframe {
+                height: 500px;
+            }
+        }
+        h2 {
+            color: #333;
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="video-list" id="videoList">
+            <h2>视频列表</h2>
+            <!-- 视频列表将通过JS动态生成 -->
+        </div>
+        <div class="video-player">
+            <h2 id="currentVideoTitle">请选择视频</h2>
+            <div id="videoContainer">
+                <!-- 视频iframe将在这里动态加载 -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // B站视频数据 (BV号列表)
+        const videos = [
+            { bvid: "BV1so4y1o7Kg", title: "林黛玉的婚事" },
+            { bvid: "BV1RX4y1c7xh", title: "红楼梦中最被低估的角色赵姨娘" },
+            { bvid: "BV1qr4y1y7YM", title: "红楼梦的隐藏主角" },
+            { bvid: "BV1Fv41137bU", title: "贾母临终前说 林黛玉与薛宝钗" },
+            { bvid: "BV1rT4y127mV", title: "大闹林黛玉婚礼的赵姨娘" },
+            { bvid: "BV1tF4m1u7pX", title: "林黛玉的原型" },
+            { bvid: "BV1664y1s74K", title: "王熙凤影射魏忠贤" },
+            { bvid: "BV1tr4y1D79D", title: "元春为何而死" },
+            { bvid: "BV1WS4y1L7zp", title: "红楼梦的结局 早已写在了开头" },
+            { bvid: "BV11BfKY7E2G", title: "刘姥姥原型" }            
+        ];
+
+        // 初始化视频列表
+        const videoListElement = document.getElementById('videoList');
+        const videoContainer = document.getElementById('videoContainer');
+        const currentVideoTitle = document.getElementById('currentVideoTitle');
+
+        videos.forEach((video, index) => {
+            const videoItem = document.createElement('div');
+            videoItem.className = 'video-item';
+            videoItem.textContent = `${index + 1}. ${video.title}`;
+            videoItem.addEventListener('click', () => {
+                // 移除所有active类
+                document.querySelectorAll('.video-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                // 添加active类到当前点击项
+                videoItem.classList.add('active');
+                // 更新当前视频标题
+                currentVideoTitle.textContent = video.title;
+                // 加载视频iframe
+                loadVideo(video.bvid);
+            });
+            videoListElement.appendChild(videoItem);
+        });
+
+        // 加载B站视频
+        function loadVideo(bvid) {
+            videoContainer.innerHTML = `
+                <iframe src="https://player.bilibili.com/player.html?bvid=${bvid}&high_quality=1&danmaku=0&autoplay=1" 
+                        scrolling="no" 
+                        allowfullscreen="true"
+                        sandbox="allow-top-navigation allow-same-origin allow-forms allow-scripts"
+                        frameborder="0">
+                </iframe>
+            `;
+        }
+
+        // 默认加载第一个视频
+        if (videos.length > 0) {
+            document.querySelector('.video-item').click();
+        }
+    </script>
+</body>
+</html>
